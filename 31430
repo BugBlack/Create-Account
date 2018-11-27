@@ -1,0 +1,82 @@
+<?php
+//Checks if submit button has been clicked in the  create account page
+if(isset($_POST['Submit']))
+ 
+  {
+    
+    require 'Backend Database Handler.php';
+    
+    $Username=$_POST['Username'];
+    $Firstname=$_POST['Firstname'];
+    $Lastname=$_POST['Lastname'];
+    $Surname=$_POST['Surname'];
+    $email=$_POST['email'];
+    $phone_number=$_POST['phone_number'];
+    $address=$_POST['address'];
+    $pass=$_POST['pass'];
+    $pass2=$_POST['pass2'];
+ 
+
+    if (empty($Username) ||empty($Firstname) ||empty($Lastname) || empty($Surname) || empty($email) || empty($phone_number) || empty($address) || empty($pass)||empty($pass2))
+        {
+        header("Location: ../Create Account.php?error=EmptyFields&Username=".$Username."&Firstname".$Firstname."&Lastname".$Lastname."&Surname".$Surname."&email".$email."&phone_number".$phone_number."&address".$address);
+        exit();
+        }
+    
+    else if($pass !== $pass2) 
+        {
+        header("Location: ../Create Account.php? error=PasswordsDonotMatch!".$Firstname."&Firstname".$Lastname."&Lastname".$Surname."&Surname".$email."&email".$phone_number."&phone_number".$address."&address");
+        exit();
+        }
+    
+    else {
+        $sql="SELECT Username FROM users WHERE Username=?";
+        $stmt=mysqli_stmt_init($conn);
+        
+        if (!mysqli_stmt_prepare($stmt,$sql)) {
+            header("Location:../Create Account.php?error=sqlerror");
+            exit();
+        }
+
+    else{
+        mysqli_stmt_bind_param($stmt,"s",$Username);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        $resultCheck = mysqli_stmt_num_rows($stmt);
+        if($resultcheck>0){
+            header("Location: ../Create Account.php? Error.");
+            exit();
+        }
+
+    else{
+        $sql=mysqli_query("INSERT INTO users(Username,Firstname,Lastname,Surname,email,phone_number,address,pass) VALUES ($Username,$Firstname,$Lastname,$Surname,$email,$phone_number,$address,$pass)");
+        $stmt=mysqli_stmt_init($conn);
+    if (!mysqli_stmt_prepare($stmt,$sql)) {
+        header("Location: ../Create Account.php?error=sqlerror");
+        ext();
+         }
+
+    else{
+        $hashedPwd = password_hash($pass,PASSWORD_DEFAULT);
+        mysqli_stmt_bind_param($stmt, "sssssss",$Firstname,$Lastname,$Surname,$email,$phone_number,$address,$hashedPwd);
+        mysqli_stmt_execute($stmt);
+        
+        header("Location: ../LogIn.php?error=Successful");
+        exit();
+         }
+        
+    //else{
+   // header("Location: ../Create Account.php");
+  // exit();
+  // }
+   mysqli_stmt_close($stmt);
+    mysqli_close($conn);
+}
+    
+    
+    
+    
+    
+    
+    
+
